@@ -1,0 +1,27 @@
+UNF:
+	each drug is a repeating group
+	db(patient No, Full Name, Ward No, Ward Name, bed number, [Drug No, drugName, description, dosage, method of admin, start date, units per day, finish date])
+
+1NF:
+	primary key: patient number, drug number, start date
+	db(*patient No*, Full Name, Ward No, Ward Name, bed number, *Drug No*, drugName, description, dosage, method of admin, *start date*, units per day, finish date)
+
+2NF:
+	full name, ward No, ward name, bed number are only dependent on Patient number
+	Drug name, description, dosage, method of admin are only dependent on drug No
+	Units per day and finish date are dependent on patient no, drug no and start date --> OK
+
+	patient(*patient No*, Full Name, ward No, ward name, bed number)
+	Drug(*Drug No*, drugName, description, dosage, method of admin)
+	db(*patient No*, *Drug No*, *start date*, units per day, finish date)
+3NF:
+	ward name is dependent on ward number --> not OK
+
+	ward(*ward No*, ward name)
+	patient(*patient No*, full name, ward No, bed number)
+	Drug(*Drug No*, drugName, description, dosage, method of admin)
+        db(*patient No*, *Drug No*, *start date*, units per day, finish date)
+
+BCNF:
+	=3NF
+
