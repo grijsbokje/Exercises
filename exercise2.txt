@@ -1,0 +1,25 @@
+UNF:
+	db (staffNo, dentistName, patientNo, patientName, appointment, surgeryNo)
+
+1NF:
+	define primary key
+	db (*staffNo*, dentistName, patientNo, patientName, *appDate*, *appTime*, surgeryNo)
+
+2NF:
+	dentistName only dependent on staffNo --> Not ok
+	patientNo and Name are dependent on staffNo and appDate and appTime --> ok
+	surgeryNo is dependent on staffNo, appDate and appTime -->
+
+	Dentist (*staffNo*, dentistName)
+	db (*staffNo*, patientNo, patientName, *appDate*, *appTime*, surgeryNo)
+3NF:
+	dentistName is ok: no other non-key elements
+	patientName is only dependent on patiëntNo --> not ok
+	surgeryNo is not dependent on patientNo of Name --> ok
+
+	Dentist	(*staffNo*, dentistName)
+	Patient (*patientNo*, patientName)
+	Appointment(*staffNo*, patientNo, *appDate*, *appTime*, surgeryNo)
+
+BCNF:
+	=3NF
