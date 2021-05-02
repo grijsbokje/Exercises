@@ -1,0 +1,199 @@
+1. List the names and addresses of all guests in London, alphabeticlaly ordered by name
+
+	select guestname, guestaddress from guest where guestaddress like "%london%" order by guestname ;
+		+--------------+--------------------+
+		| guestname    | guestaddress       |
+		+--------------+--------------------+
+		| John Kay     | 56 High St, London |
+		| Mike Ritchie | 18 Tain St, London |
+		+--------------+--------------------+
+
+2. List all double or family rooms with a price below £40.00 per night, cheapest first.
+	
+	select * from room where (type="double" or type="family") and price<40.00 order by price asc;
+		+--------+---------+--------+-------+
+		| roomno | hotelno | type   | price |
+		+--------+---------+--------+-------+
+		|    801 | ch02    | double | 15.00 |
+		|    601 | fb01    | double | 29.00 |
+		|   1001 | dc01    | double | 30.00 |
+		|   1101 | dc01    | family | 35.00 |
+		|    701 | fb01    | family | 39.00 |
+		+--------+---------+--------+-------+
+
+3. List the bookings for which no date_to has been specified.
+
+	select * from booking where dateto is NULL;
+		+---------+---------+------------+--------+--------+
+		| hotelno | guestno | datefrom   | dateto | roomno |
+		+---------+---------+------------+--------+--------+
+		| ch01    |   10006 | 2020-04-21 | NULL   |   1101 |
+		| dc01    |   10003 | 2020-05-20 | NULL   |   1001 |
+		| fb01    |   10001 | 2020-05-01 | NULL   |    701 |
+		+---------+---------+------------+--------+--------+
+
+4. What is the average price of a room?
+
+	select avg(price) from room;
+		+------------+
+		| avg(price) |
+		+------------+
+		|  35.748333 |
+		+------------+
+
+5. What is the total revenue per night from all double rooms?
+
+	select sum(price) from room where type="double";
+		+------------+
+		| sum(price) |
+		+------------+
+		|     160.00 |
+		+------------+
+
+6. How many different guests have made bookings for August?
+
+	select count(*) from booking where (datefrom <= "2020-08-01" and dateto >= "2020-08-01") or
+	(datefrom >= "2020-08-01" and datefrom <= "2020-08-31");
+		+----------+
+		| count(*) |
+		+----------+
+		|        2 |
+		+----------+
+
+7. List the price and type of all rooms at the The Tower Hotel
+
+	select * from room join hotel on room.hotelno = hotel.hotelno where hotelname= "The Tower Hotel";
+		+--------+---------+--------+-------+---------+-----------------+--------+
+		| roomno | hotelno | type   | price | hotelno | hotelname       | city   |
+		+--------+---------+--------+-------+---------+-----------------+--------+
+		|    501 | fb01    | single | 19.00 | fb01    | The Tower Hotel | London |
+		|    601 | fb01    | double | 29.00 | fb01    | The Tower Hotel | London |
+		|    701 | fb01    | family | 39.00 | fb01    | The Tower Hotel | London |
+		+--------+---------+--------+-------+---------+-----------------+--------+
+
+8. List all guests currently staying at the The Tower Hotel
+
+	select * from booking join guest on guest.guestno=booking.guestno join hotel on hotel.hotelno=booking.hotelno where hotelname= "The Tower Hotel" and curdate() between datefrom and dateto;
+		+---------+---------+------------+------------+--------+---------+--------------+-----------------------+---------+-----------------+--------+
+		| hotelno | guestno | datefrom   | dateto     | roomno | guestno | guestname    | guestaddress          | hotelno | hotelname       | city   |
+		+---------+---------+------------+------------+--------+---------+--------------+-----------------------+---------+-----------------+--------+
+		| fb01    |   10004 | 2021-04-15 | 2021-05-15 |    601 |   10004 | Joe Keogh    | 2 Fergus Dr, Aberdeen | fb01    | The Tower Hotel | London |
+		| fb01    |   10005 | 2021-05-02 | 2021-05-07 |    501 |   10005 | Carol Farrel | 6 Achray St, Glasgow  | fb01    | The Tower Hotel | London |
+		+---------+---------+------------+------------+--------+---------+--------------+-----------------------+---------+-----------------+--------+
+
+9. List the details of all rooms at the The Tower Hotel, including the name of the guest staying in the room, if the room is occupied
+
+	select * from hotel join booking on booking.hotelno=hotel.hotelno join guest on guest.guestno=booking.guestno right join room on room.roomno=booking.roomno and room.hotelno=booking.hotelno where hotelname= "The Tower Hotel";
+		+---------+-----------------+--------+---------+---------+------------+------------+--------+---------+--------------+-----------------------+--------+---------+--------+-------+
+		| hotelno | hotelname       | city   | hotelno | guestno | datefrom   | dateto     | roomno | guestno | guestname    | guestaddress          | roomno | hotelno | type   | price |
+		+---------+-----------------+--------+---------+---------+------------+------------+--------+---------+--------------+-----------------------+--------+---------+--------+-------+
+		| fb01    | The Tower Hotel | London | fb01    |   10001 | 2021-04-01 | 2021-04-08 |    501 |   10001 | John Kay     | 56 High St, London    |    501 | fb01    | single | 19.00 |
+		| fb01    | The Tower Hotel | London | fb01    |   10001 | 2021-05-01 | NULL       |    701 |   10001 | John Kay     | 56 High St, London    |    701 | fb01    | family | 39.00 |
+		| fb01    | The Tower Hotel | London | fb01    |   10002 | 2021-01-04 | 2021-01-29 |    601 |   10002 | Mike Ritchie | 18 Tain St, London    |    601 | fb01    | double | 29.00 |
+		| fb01    | The Tower Hotel | London | fb01    |   10004 | 2021-04-15 | 2021-05-15 |    601 |   10004 | Joe Keogh    | 2 Fergus Dr, Aberdeen |    601 | fb01    | double | 29.00 |
+		| fb01    | The Tower Hotel | London | fb01    |   10005 | 2021-05-02 | 2021-05-07 |    501 |   10005 | Carol Farrel | 6 Achray St, Glasgow  |    501 | fb01    | single | 19.00 |
+		+---------+-----------------+--------+---------+---------+------------+------------+--------+---------+--------------+-----------------------+--------+---------+--------+-------+
+	
+10. What is the total income from bookings for the The Tower Hotel today?
+
+	select sum(price) from hotel join booking on booking.hotelno=hotel.hotelno join guest on guest.guestno=booking.guestno right join room
+	on room.roomno=booking.roomno and room.hotelno=booking.hotelno where hotelname= "The Tower Hotel" and curdate() between datefrom and dateto;
+		+------------+
+		| sum(price) |
+		+------------+
+		|      48.00 |
+		+------------+
+
+11. list the rooms that are currently uoccupied at the The Tower Hotel
+
+	you use this as subquery: to know which rooms are occupied: 
+		select room.roomno from hotel join booking on booking.hotelno=hotel.hotelno join guest on guest.guestno=booking.guestno 
+		right join room on room.roomno=booking.roomno and room.hotelno=booking.hotelno where hotelname= "The Tower Hotel" and curdate() between datefrom and dateto;
+			+--------+
+			| roomno |
+			+--------+
+			|    601 |
+			|    501 |
+			+--------+
+	
+	Then you look at all the rooms except for these 2:
+		
+		select * from hotel join room on room.hotelno=hotel.hotelno where roomno not in (select room.roomno from hotel join booking on booking.hotelno=hotel.hotelno 
+		join guest on guest.guestno=booking.guestno right join room on room.roomno=booking.roomno and room.hotelno=booking.hotelno where hotelname= "The Tower Hotel" and curdate() between datefrom and dateto);
+			+---------+-----------------+--------+--------+---------+--------+-------+
+			| hotelno | hotelname       | city   | roomno | hotelno | type   | price |
+			+---------+-----------------+--------+--------+---------+--------+-------+
+			| ch01    | Omni Shoreham   | London |   1001 | ch01    | single | 29.99 |
+			| ch01    | Omni Shoreham   | London |   1101 | ch01    | family | 59.99 |
+			| ch02    | Phoenix Park    | London |    701 | ch02    | single | 10.00 |
+			| ch02    | Phoenix Park    | London |    801 | ch02    | double | 15.00 |
+			| dc01    | Latham          | Berlin |    901 | dc01    | single | 18.00 |
+			| dc01    | Latham          | Berlin |   1001 | dc01    | double | 30.00 |
+			| dc01    | Latham          | Berlin |   1101 | dc01    | family | 35.00 |
+			| fb01    | The Tower Hotel | London |    701 | fb01    | family | 39.00 |
+			| fb02    | Watergate       | Paris  |   1001 | fb02    | single | 58.00 |
+			| fb02    | Watergate       | Paris  |   1101 | fb02    | double | 86.00 |
+			+---------+-----------------+--------+--------+---------+--------+-------+
+
+	Then you filter out the rooms for The Tower Hotel:
+		select * from hotel join room on room.hotelno=hotel.hotelno where roomno not in (select room.roomno from hotel join booking on booking.hotelno=hotel.hotelno 
+		join guest on guest.guestno=booking.guestno right join room on room.roomno=booking.roomno and room.hotelno=booking.hotelno where hotelname= "The Tower Hotel" 
+		and curdate() between datefrom and dateto) and hotelname="The Tower Hotel";
+			+---------+-----------------+--------+--------+---------+--------+-------+
+			| hotelno | hotelname       | city   | roomno | hotelno | type   | price |
+			+---------+-----------------+--------+--------+---------+--------+-------+
+			| fb01    | The Tower Hotel | London |    701 | fb01    | family | 39.00 |
+			+---------+-----------------+--------+--------+---------+--------+-------+
+
+12. What is the lost income from unoccupied rooms at the The Tower Hotel?
+	
+	select sum(price) from hotel join room on room.hotelno=hotel.hotelno where roomno not in (select room.roomno from hotel join booking on booking.hotelno=hotel.hotelno 
+	join guest on guest.guestno=booking.guestno right join room on room.roomno=booking.roomno and room.hotelno=booking.hotelno where hotelname= "The Tower Hotel" 
+	and curdate() between datefrom and dateto) and hotelname="The Tower Hotel";
+		+------------+
+		| sum(price) |
+		+------------+
+		|      39.00 |
+		+------------+
+
+13. List the number of rooms in each hotel in London
+
+	select hotelname, count(*) from hotel join room on room.hotelno=hotel.hotelno where city= "London" group by hotelname;
+		+-----------------+----------+
+		| hotelname       | count(*) |
+		+-----------------+----------+
+		| Omni Shoreham   |        2 |
+		| Phoenix Park    |        2 |
+		| The Tower Hotel |        3 |
+		+-----------------+----------+
+
+14. What is the most booked romo type for each hotel in London?
+
+	select hotelname, type, count(type) from hotel join room on room.hotelno=hotel.hotelno join booking on booking.roomno=room.roomno
+	 and booking.hotelno=hotel.hotelno where city= "London" group by hotelname, type order by count(type) desc;
+		+-----------------+--------+-------------+
+		| hotelname       | type   | count(type) |
+		+-----------------+--------+-------------+
+		| The Tower Hotel | single |           2 |
+		| The Tower Hotel | double |           2 |
+		| Phoenix Park    | double |           1 |
+		| The Tower Hotel | family |           1 |
+		| Omni Shoreham   | family |           1 |
+		+-----------------+--------+-------------+
+	
+		
+	Je kan ook zorgen dat er maar 1 kamer per hotel zichtbaar is:
+		select * from (select hotelname, type, count(type) from hotel join room on room.hotelno=hotel.hotelno 
+		join booking on booking.roomno=room.roomno and booking.hotelno=hotel.hotelno where city= "London" 
+		group by hotelname, type order by count(type) desc) as sel1 group by sel1.hotelname;
+			+-----------------+--------+-------------+
+			| hotelname       | type   | count(type) |
+			+-----------------+--------+-------------+
+			| Omni Shoreham   | family |           1 |
+			| Phoenix Park    | double |           1 |
+			| The Tower Hotel | single |           2 |
+			+-----------------+--------+-------------+
+
+15. Update the price of all rooms by 5%
+
+	update room set price=price*1.05;		
