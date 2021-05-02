@@ -1,0 +1,192 @@
+1. Retrieve the name, city and grade point average (GPA) of students, greater than or equal to 3.7
+
+	select stdFirstName, stdLastName, stdCity, stdGPA from student where stdGPA >= 3.7;
+		+--------------+-------------+---------+--------+
+		| stdFirstName | stdLastName | stdCity | stdGPA |
+		+--------------+-------------+---------+--------+
+		| CRISTOPHER   | COLAN       | SEATTLE |   4.00 |
+		| WILLIAM      | PILGRIM     | BOTHELL |   3.80 |
+		+--------------+-------------+---------+--------+
+
+2. List the name and hiring date of faculty hired in 1999 or 2000
+
+	select FacFirstName, FacLastName, FacHireDate from faculty where year(FacHireDate) between 1999 and 2000;
+		+--------------+-------------+-------------+
+		| FacFirstName | FacLastName | FacHireDate |
+		+--------------+-------------+-------------+
+		| CRISTOPHER   | COLAN       | 1999-03-01  |
+		| JULIA        | MILLS       | 2000-03-15  |
+		+--------------+-------------+-------------+
+
+3. List the offer number, course number and faculty Social Security number for course offerings scheduled in fall 2005 or winter 2006
+
+	select OfferNo, CourseNo, FacSSN from offering where (OffTerm= "FALL" and OffYear= "2005") or (OffTerm="WINTER" and OffYear="2006");
+		+---------+----------+-------------+
+		| OfferNo | CourseNo | FacSSN      |
+		+---------+----------+-------------+
+		|    1234 | IS320    | 098-76-5432 |
+		|    4321 | IS320    | 098-76-5432 |
+		|    4444 | IS320    | 543-21-0987 |
+		|    5555 | FIN300   | 765-43-2109 |
+		|    5678 | IS480    | 987-65-4321 |
+		|    6666 | FIN450   | 987-65-4321 |
+		+---------+----------+-------------+
+
+4. List the offering number, course number, days and time of offerings containing the words database or programming in the course description and taught in spring 2006
+
+	select OfferNo, course.CourseNo, OffDays, OffTime from course join offering on offering.CourseNo=course.CourseNo where (OffTerm="SPRING" and OffYear="2006")
+	and (crsDesc like "%Database%" or crsDesc like  "%programming%");
+		+---------+----------+---------+----------+
+		| OfferNo | CourseNo | OffDays | OffTime  |
+		+---------+----------+---------+----------+
+		|    3333 | IS320    | MW      | 08:30:00 |
+		|    5679 | IS480    | TTH     | 15:30:00 |
+		+---------+----------+---------+----------+
+	
+5. List the offer number, course number and name of the instructor of IS course offerings scheduled in fall 2005 taught by assistand professors
+
+	select OfferNo, CourseNo, FacFirstName, FacLastName from offering join faculty on faculty.FacSSN = offering.FacSSN where CourseNo like "IS%" and OffTerm="FALL" and OffYear="2005" and FacRank="ASST";
+		+---------+----------+--------------+-------------+
+		| OfferNo | CourseNo | FacFirstName | FacLastName |
+		+---------+----------+--------------+-------------+
+		|    1234 | IS320    | LEONARD      | VINCE       |
+		|    4321 | IS320    | LEONARD      | VINCE       |
+		+---------+----------+--------------+-------------+
+
+6. Summerize the averageGPA of students by major
+
+	select stdMajor, avg(stdGPA) from student group by stdMajor;
+		+----------+-------------+
+		| stdMajor | avg(stdGPA) |
+		+----------+-------------+
+		| ACCT     |    3.400000 |
+		| FIN      |    2.800000 |
+		| IS       |    3.233333 |
+		+----------+-------------+
+
+7. Summerize the number of offerings and unique courses by year
+
+	select OffYear,count(OfferNo),  count(distinct CourseNo) from offering group by OffYear;
+		+---------+----------------+--------------------------+
+		| OffYear | count(OfferNo) | count(distinct CourseNo) |
+		+---------+----------------+--------------------------+
+		|    2005 |              3 |                        2 |
+		|    2006 |             10 |                        6 |
+		+---------+----------------+--------------------------+
+
+8.Summerize the average GPA of upper-division (junior or senior) students by major
+
+	select stdMajor, avg(stdGPA) from student where StdClass="JR" or StdClass="SR" group by StdMajor ;
+		+----------+-------------+
+		| stdMajor | avg(stdGPA) |
+		+----------+-------------+
+		| ACCT     |    3.500000 |
+		| FIN      |    2.800000 |
+		| IS       |    3.150000 |
+		+----------+-------------+
+
+	Only list the major with average GPA greater dan 3.1:
+
+		select stdMajor, avg(stdGPA) from student where StdClass="JR" or StdClass="SR" group by StdMajor having avg(stdGPA)>3.1;
+			+----------+-------------+
+			| stdMajor | avg(stdGPA) |
+			+----------+-------------+
+			| ACCT     |    3.500000 |
+			| IS       |    3.150000 |
+			+----------+-------------+
+
+9.Summerize the minimum and maximum GPA of students by major and class
+	
+	select stdMajor, StdClass, min(stdGPA), max(stdGPA)  from student group by stdMajor, StdClass;
+		+----------+----------+-------------+-------------+
+		| stdMajor | StdClass | min(stdGPA) | max(stdGPA) |
+		+----------+----------+-------------+-------------+
+		| ACCT     | JR       |        3.50 |        3.50 |
+		| ACCT     | SO       |        3.30 |        3.30 |
+		| FIN      | JR       |        2.50 |        2.70 |
+		| FIN      | SR       |        3.20 |        3.20 |
+		| IS       | FR       |        3.00 |        3.00 |
+		| IS       | JR       |        3.60 |        3.60 |
+		| IS       | SO       |        3.80 |        3.80 |
+		| IS       | SR       |        2.20 |        4.00 |
+		+----------+----------+-------------+-------------+
+
+10. Summerize the number of IS course offering by course description
+
+	 select crsDesc, count(*) from offering join course on course.CourseNo=offering.CourseNo where course.CourseNo like "IS%" group by crsDesc;
+		+--------------------------------------+----------+
+		| crsDesc                              | count(*) |
+		+--------------------------------------+----------+
+		| FUNDAMENTALS OF BUSINESS PROGRAMMING |        6 |
+		| FUNDAMENTALS OF DATABASE MANAGEMENT  |        2 |
+		| SYSTEMS ANALYSIS                     |        2 |
+		+--------------------------------------+----------+
+
+11. List the GPA, name city and state of juniors, lowest GPA first
+		
+	select stdGPA, stdFirstName, stdLastName, stdCity, stdState  from student where StdClass="JR" order by stdGPA asc;
+		+--------+--------------+-------------+---------+----------+
+		| stdGPA | stdFirstName | stdLastName | stdCity | stdState |
+		+--------+--------------+-------------+---------+----------+
+		|   2.50 | ROBERTO      | MORALES     | SEATTLE | WA       |
+		|   2.70 | BOB          | NORBERT     | BOTHELL | WA       |
+		|   3.50 | CANDY        | KENDALL     | TACOMA  | WA       |
+		|   3.60 | MARIAH       | DODGE       | SEATTLE | WA       |
+		+--------+--------------+-------------+---------+----------+
+
+12. List the unique city and state combination in the faculty table
+
+	select distinct FacState, FacCity from faculty;
+		+----------+----------+
+		| FacState | FacCity  |
+		+----------+----------+
+		| WA       | SEATTLE  |
+		| WA       | BOTHELL  |
+		| WA       | BELLEVUE |
+		+----------+----------+
+
+13. List the student name, offering number and grade of student who have a grade >= 3.5 in a course offering
+
+	select stdFirstName, stdLastName, OfferNo, EnrGrade  from student join enrollment on student.StdSSN=enrollment.StdSSN where EnrGrade >= 3.5;
+		+--------------+-------------+---------+----------+
+		| stdFirstName | stdLastName | OfferNo | EnrGrade |
+		+--------------+-------------+---------+----------+
+		| CANDY        | KENDALL     |    1234 |     3.50 |
+		| MARIAH       | DODGE       |    1234 |     3.80 |
+		| HOMER        | WELLS       |    4321 |     3.50 |
+		| ROBERTO      | MORALES     |    4321 |     3.50 |
+		| BOB          | NORBERT     |    5679 |     3.70 |
+		| ROBERTO      | MORALES     |    5679 |     3.80 |
+		| MARIAH       | DODGE       |    6666 |     3.60 |
+		| LUKE         | BRAZZI      |    7777 |     3.70 |
+		| BOB          | NORBERT     |    9876 |     3.50 |
+		| WILLIAM      | PILGRIM     |    9876 |     4.00 |
+		+--------------+-------------+---------+----------+
+
+14. List the names of students without duplicated who have grades >= 3.5 in a course offering
+
+	select distinct stdFirstName, stdLastName from student join enrollment on student.StdSSN=enrollment.StdSSN where EnrGrade >= 3.5;
+		+--------------+-------------+
+		| stdFirstName | stdLastName |
+		+--------------+-------------+
+		| CANDY        | KENDALL     |
+		| MARIAH       | DODGE       |
+		| HOMER        | WELLS       |
+		| ROBERTO      | MORALES     |
+		| BOB          | NORBERT     |
+		| LUKE         | BRAZZI      |
+		| WILLIAM      | PILGRIM     |
+		+--------------+-------------+
+
+15. List Bob Norbert's course schedule in spring 2006. For each course, list the offering number, course number, days, location, time and faculty name
+
+	select stdFirstName, stdLastName,offering.OfferNo, offering.CourseNo, OffDays, OffLocation, OffTime, FacFirstName, FacLastName  from student 
+	join enrollment on student.stdSSN=enrollment.stdSSN join offering on offering.OfferNo=enrollment.OfferNo join faculty on faculty.FacSSN=offering.FacSSN 
+	where stdFirstName = "Bob" and stdLastName = "Norbert" and OffTerm="SPRING" and OffYear="2006";
+		+--------------+-------------+---------+----------+---------+-------------+----------+--------------+-------------+
+		| stdFirstName | stdLastName | OfferNo | CourseNo | OffDays | OffLocation | OffTime  | FacFirstName | FacLastName |
+		+--------------+-------------+---------+----------+---------+-------------+----------+--------------+-------------+
+		| BOB          | NORBERT     |    5679 | IS480    | TTH     | BLM412      | 15:30:00 | CRISTOPHER   | COLAN       |
+		| BOB          | NORBERT     |    9876 | IS460    | TTH     | BLM307      | 13:30:00 | LEONARD      | FIBON       |
+		+--------------+-------------+---------+----------+---------+-------------+----------+--------------+-------------+
+
