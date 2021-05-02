@@ -1,0 +1,1 @@
+GRANT ALL ON Exercise 4 lecture 6.* TO jela@localhost;
